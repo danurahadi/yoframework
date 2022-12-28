@@ -17,8 +17,8 @@
 package id.yoframework.extra.extension.pebble
 
 import arrow.core.Eval
-import com.mitchellbosecke.pebble.PebbleEngine
-import com.mitchellbosecke.pebble.template.PebbleTemplate
+import io.pebbletemplates.pebble.PebbleEngine
+import io.pebbletemplates.pebble.template.PebbleTemplate
 import java.io.StringWriter
 import java.util.*
 
@@ -38,7 +38,6 @@ object Pebble {
             engine.value()
         }
     }
-
 }
 
 fun Pebble.compileStringTemplate(templateString: String, strictMode: Boolean = false): PebbleTemplate {

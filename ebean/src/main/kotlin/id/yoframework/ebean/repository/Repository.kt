@@ -46,8 +46,7 @@ open class Repository<T : Model, in I : Any>(
     }
 
     open fun save(o: T, transaction: Transaction? = null) {
-        val ebeanTransaction = transaction ?: ebean.beginTransaction()
-        return ebean.save(o, ebeanTransaction)
+        return ebean.save(o, transaction)
     }
 
     open fun saveAll(list: List<T>, transaction: Transaction? = null): Int {

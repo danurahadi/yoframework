@@ -106,7 +106,7 @@ tasks {
     }
 
     jacoco {
-        toolVersion = "0.8.7"
+        toolVersion = "0.8.8"
     }
 
     jacocoTestReport {
@@ -145,7 +145,7 @@ artifacts {
 }
 
 detekt {
-    toolVersion = "1.20.0"
+    toolVersion = "1.22.0"
     input = files("src/main/kotlin")
     buildUponDefaultConfig = true
     parallel = true
