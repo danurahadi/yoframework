@@ -28,6 +28,7 @@ import id.yoframework.web.exception.ValidationException
 import id.yoframework.web.extension.ErrorHandler
 import id.yoframework.web.extension.header
 import io.netty.handler.codec.http.HttpResponseStatus
+import io.netty.handler.codec.http.HttpStatusClass
 import io.vertx.core.json.Json
 import io.vertx.ext.web.RoutingContext
 import java.io.FileNotFoundException
@@ -63,7 +64,7 @@ object DefaultErrorHandler : ErrorHandler {
     override fun invoke(context: RoutingContext, e: Throwable?) {
         val code = mapException(context, e)
 
-        if (code.toString().startsWith("5")) {
+        if (HttpStatusClass.valueOf(code) == HttpStatusClass.SERVER_ERROR) {
             log.error(e?.message)
         }
 

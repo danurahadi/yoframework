@@ -27,7 +27,6 @@ import io.vertx.kotlin.coroutines.coAwait
 fun RoutingContext.wireJson(obj: Any) {
     val response = this.response()
     response
-        .setChunked(true)
         .putHeader("Access-Control-Allow-Origin", "*")
         .putHeader("Content-Type", "application/json; charset=utf-8")
         .end(encode(obj))

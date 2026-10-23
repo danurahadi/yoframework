@@ -16,8 +16,6 @@
 
 package id.yoframework.web.verticle
 
-import arrow.core.Try
-import arrow.core.getOrElse
 import id.yoframework.core.extension.logger.logger
 import id.yoframework.web.controller.Controller
 import id.yoframework.web.extension.startHttpServer
@@ -48,7 +46,7 @@ open class WebVerticle(
 
     override suspend fun start() {
         val router = controller.create()
-        Try {
+        runCatching {
             val port = resolvePort()
             log.info("Starting $serverName on port $port")
 
@@ -58,15 +56,15 @@ open class WebVerticle(
             val compressionLevel = resolveCompressionLevel()
             log.info("HTTP Compression Level set to $compressionLevel")
 
-            val serverOptions = httpServerOptionsOf().apply {
-                isCompressionSupported = compressionSupported
-                setCompressionLevel(compressionLevel)
-            }
+            val serverOptions = httpServerOptionsOf(
+                compressionSupported = compressionSupported,
+                compressionLevel = compressionLevel
+            )
 
             val httpServer = vertx.startHttpServer(router, port, serverOptions)
             log.info("$serverName started in port ${httpServer.actualPort()}")
-        }.getOrElse {
+        }.onFailure {
             log.error("Failed to start $serverName. [${it.message}]", it)
-        }
+        }.getOrThrow()
     }
 }

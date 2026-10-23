@@ -43,9 +43,7 @@ suspend fun WebClient.postForm(
     header: Map<String, String> = emptyMap(),
     formData: Map<String, String>
 ): HttpResponse<Buffer> {
-    val payload = formData.toList().fold(MultiMap.caseInsensitiveMultiMap()) { form, [key, value] ->
-        form.set(key, value)
-    }
+    val payload = MultiMap.caseInsensitiveMultiMap().addAll(formData)
     return this.postAbs(absoluteURI).apply { headers().addAll(header) }.sendForm(payload).coAwait()
 }
 

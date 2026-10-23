@@ -18,6 +18,7 @@ package id.yoframework.web.exception
 
 import id.yoframework.core.exception.DataInconsistentException
 import id.yoframework.core.exception.NullObjectException
+import io.vertx.core.json.DecodeException
 import io.vertx.core.json.JsonObject
 import io.vertx.ext.web.client.HttpResponse
 
@@ -48,7 +49,14 @@ data class RequestException(
 ) : RuntimeException(message, ex) {
     val statusCode = response.statusCode()
     val stringBody: String? = response.bodyAsString()
-    val jsonBody: JsonObject? = response.bodyAsJsonObject()
+    // Non-JSON error bodies (e.g. HTML) must not make the exception constructor itself throw
+    val jsonBody: JsonObject? by lazy {
+        try {
+            response.bodyAsJsonObject()
+        } catch (_: DecodeException) {
+            null
+        }
+    }
 }
 
 infix fun <T> T?.orNotFound(message: String): T {
