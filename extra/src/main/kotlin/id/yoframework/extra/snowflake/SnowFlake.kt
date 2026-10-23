@@ -25,22 +25,14 @@ import java.util.concurrent.atomic.AtomicInteger
 private class SnowFlake(private val machineId: Int) {
     init {
         require(machineId in 1 until MAX_MACHINE_ID) {
-            "Machine Number must between 0 - ${MAX_MACHINE_ID - 1}"
+            "Machine Number must between 1 - ${MAX_MACHINE_ID - 1}"
         }
     }
 
     fun nextId(): Long {
-        synchronized(this) {
-            val currentTs = System.currentTimeMillis()
-            val ts = currentTs - EPOCH
-            val max = MAX_INCREMENT - 2
-
-            if (ATOMIC_INCREMENT.get() >= max) {
-                ATOMIC_INCREMENT.set(0)
-            }
-            val i = ATOMIC_INCREMENT.incrementAndGet()
-            return (ts shl TIME_STAMP_SHIFT) or (this.machineId shl MACHINE_ID_SHIFT).toLong() or i.toLong()
-        }
+        val ts = System.currentTimeMillis() - EPOCH
+        val i = ATOMIC_INCREMENT.updateAndGet { if (it >= MAX_INCREMENT - 2) 1 else it + 1 }
+        return (ts shl TIME_STAMP_SHIFT) or (this.machineId shl MACHINE_ID_SHIFT).toLong() or i.toLong()
     }
 
     companion object {
@@ -65,13 +57,8 @@ private val cache = CacheBuilder.newBuilder()
     .build<Int, SnowFlake>()
 
 fun nextId(machineId: Int = 42): Long {
-    val cached = cache.getIfPresent(machineId)
-    val snowFlake = if (cached == null) {
-        val newSnowFlake = SnowFlake(machineId)
-        cache.put(machineId, newSnowFlake)
-        newSnowFlake
-    } else {
-        cached
+    val snowFlake = cache.getIfPresent(machineId) ?: synchronized(cache) {
+        cache.getIfPresent(machineId) ?: SnowFlake(machineId).also { cache.put(machineId, it) }
     }
     return snowFlake.nextId()
 }
@@ -85,11 +72,11 @@ fun parse(id: Long): SnowFlakeId {
     val ts = (id shr SnowFlake.TIME_STAMP_SHIFT) + SnowFlake.EPOCH
     val max = SnowFlake.MAX_MACHINE_ID - 1L
     val machineId = (id shr SnowFlake.MACHINE_ID_SHIFT) and max
-    val i = id and max
+    val i = id and ((1L shl SnowFlake.MACHINE_ID_SHIFT) - 1)
     return SnowFlakeId(ts.toLocalDateTime(), machineId.toInt(), i.toInt())
 }
 
 fun parse(alpha: String): SnowFlakeId {
-    val id = java.lang.Long.parseLong(alpha.lowercase(), SnowFlake.ALPHA_NUMERIC_BASE)
+    val id = alpha.lowercase().toLong(SnowFlake.ALPHA_NUMERIC_BASE)
     return parse(id)
 }

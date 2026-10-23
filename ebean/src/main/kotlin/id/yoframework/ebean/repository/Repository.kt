@@ -34,7 +34,7 @@ open class Repository<T : Model, in I : Any>(
     }
 
     open fun exists(id: I): Boolean {
-        return findOne(id) != null
+        return query.setId(id).exists()
     }
 
     open fun findOne(id: I): T? {

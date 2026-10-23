@@ -16,27 +16,18 @@
 
 package id.yoframework.extra.extension.pebble
 
-import arrow.core.Eval
 import io.pebbletemplates.pebble.PebbleEngine
 import io.pebbletemplates.pebble.template.PebbleTemplate
 import java.io.StringWriter
 import java.util.*
 
 object Pebble {
-    private val engine = Eval.later {
-        PebbleEngine.Builder().build()
-    }
+    private val engine by lazy { PebbleEngine.Builder().build() }
 
-    private val strictEngine = Eval.later {
-        PebbleEngine.Builder().strictVariables(true).build()
-    }
+    private val strictEngine by lazy { PebbleEngine.Builder().strictVariables(true).build() }
 
     fun engine(strictMode: Boolean = false): PebbleEngine {
-        return if (strictMode) {
-            strictEngine.value()
-        } else {
-            engine.value()
-        }
+        return if (strictMode) strictEngine else engine
     }
 }
 

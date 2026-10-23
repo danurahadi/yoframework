@@ -20,7 +20,7 @@ import java.util.regex.Matcher
 import java.util.regex.Pattern
 
 fun List<Regex>.regexPatterns(): String {
-    return this.map { it.pattern }.reduce { i, s -> "$i - $s" }
+    return this.joinToString(" - ") { it.pattern }
 }
 
 fun List<Regex>.matches(input: String): Boolean {
@@ -32,7 +32,7 @@ fun List<Regex>.containMatchIn(input: String): Boolean {
 }
 
 fun List<Regex>.find(input: String, startIndex: Int = 0): List<MatchResult> {
-    return this.mapNotNull { it.find(input, startIndex) }.map { it }
+    return this.mapNotNull { it.find(input, startIndex) }
 }
 
 data class Match(val start: Int, val end: Int, val text: String, val group: List<String> = emptyList())
@@ -69,38 +69,20 @@ fun String.matchTo(pattern: String): Matcher {
     return p.matcher(this)
 }
 
+private fun Matcher.toMatch(): Match {
+    return Match(start(), end(), group(), List(groupCount()) { group(it + 1) })
+}
+
 fun String.matchFirst(pattern: String): Match? {
     val matcher = this.matchTo(pattern)
-    return if (matcher.find()) {
-        val groupCount = matcher.groupCount()
-        val groups =
-            if (groupCount < 1) {
-                emptyList<String>()
-            } else {
-                (1..groupCount).map {
-                    matcher.group(it)
-                }
-            }
-        Match(matcher.start(), matcher.end(), matcher.group(), groups)
-    } else {
-        null
-    }
+    return if (matcher.find()) matcher.toMatch() else null
 }
 
 fun String.matchAll(pattern: String): List<Match> {
     val matcher = this.matchTo(pattern)
-    val result: MutableList<Match> = arrayListOf()
+    val result = arrayListOf<Match>()
     while (matcher.find()) {
-        val groupCount = matcher.groupCount()
-        val groups =
-            if (groupCount < 1) {
-                emptyList<String>()
-            } else {
-                (1..groupCount).map {
-                    matcher.group(it)
-                }
-            }
-        result.add(Match(matcher.start(), matcher.end(), matcher.group(), groups))
+        result.add(matcher.toMatch())
     }
     return result
 }

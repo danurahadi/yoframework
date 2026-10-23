@@ -18,15 +18,13 @@ package id.yoframework.extra.extension.command
 
 import id.yoframework.core.extension.logger.logger
 import id.yoframework.core.extension.resource.homeDir
-import org.apache.commons.io.FileUtils
-import org.apache.commons.io.IOUtils
 import java.io.File
-import java.io.FileInputStream
 import java.io.InputStream
 import java.io.OutputStream
-import java.util.*
 
 object Command
+
+private val log = logger("CommandExtension")
 
 /**
  * Execute command in form of List<String>.
@@ -47,60 +45,47 @@ fun execute(
     directory: String = homeDir(),
     config: (ProcessBuilder) -> Unit = {}
 ): Int {
-    val log = logger("CommandExtension")
-
-    log.debug("Command to Execute ${commands.joinToString(" ")}")
-
-    val tmpDir: String = System.getProperty("java.io.tmpdir")
+    log.debug("Command to Execute {}", commands.joinToString(" "))
 
     val processBuilder = ProcessBuilder(commands)
-
-    val env = processBuilder.environment()
-    env.putAll(environment)
-
+    processBuilder.environment().putAll(environment)
     processBuilder.directory(File(directory))
-
     config(processBuilder)
 
-    when (input) {
-        is File -> {
-            log.debug("Accept File Input")
-            processBuilder.redirectInput(input)
-        }
-        is InputStream -> {
-            log.debug("Accept InputStream Input")
-            val inputFile = File(tmpDir, UUID.randomUUID().toString())
-            FileUtils.copyInputStreamToFile(input, inputFile)
-            processBuilder.redirectInput(inputFile)
-        }
-        is String -> {
-            log.debug("Accept String Input")
-            val inputFile = File(tmpDir, UUID.randomUUID().toString())
-            FileUtils.writeStringToFile(inputFile, input, "UTF-8")
-            processBuilder.redirectInput(inputFile)
-        }
-    }
-
-    return when (output) {
-        is File -> {
-            processBuilder.redirectOutput(output)
-            processBuilder.start().waitFor()
-        }
-        is OutputStream -> {
-            val inputFile = File(tmpDir, UUID.randomUUID().toString())
-            processBuilder.redirectOutput(inputFile)
-            val exitCode = processBuilder.start().waitFor()
-
-            FileInputStream(inputFile).use { fis ->
-                output.use {
-                    IOUtils.copy(fis, output)
-                }
+    var inputFile: File? = null
+    try {
+        when (input) {
+            is File -> {
+                log.debug("Accept File Input")
+                processBuilder.redirectInput(input)
             }
+            is InputStream -> {
+                log.debug("Accept InputStream Input")
+                inputFile = File.createTempFile("yo-command-", null)
+                input.use { source -> inputFile.outputStream().use { source.transferTo(it) } }
+                processBuilder.redirectInput(inputFile)
+            }
+            is String -> {
+                log.debug("Accept String Input")
+                inputFile = File.createTempFile("yo-command-", null)
+                inputFile.writeText(input)
+                processBuilder.redirectInput(inputFile)
+            }
+        }
 
-            exitCode
+        return when (output) {
+            is File -> {
+                processBuilder.redirectOutput(output)
+                processBuilder.start().waitFor()
+            }
+            is OutputStream -> {
+                val process = processBuilder.start()
+                output.use { process.inputStream.transferTo(it) }
+                process.waitFor()
+            }
+            else -> processBuilder.start().waitFor()
         }
-        else -> {
-            processBuilder.start().waitFor()
-        }
+    } finally {
+        inputFile?.delete()
     }
 }

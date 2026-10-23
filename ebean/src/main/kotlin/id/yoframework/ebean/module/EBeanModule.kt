@@ -16,10 +16,9 @@
 
 package id.yoframework.ebean.module
 
-import arrow.core.getOrElse
 import dagger.Module
 import dagger.Provides
-import id.yoframework.core.json.getTry
+import id.yoframework.core.json.getExcept
 import id.yoframework.core.module.CoreModule
 import id.yoframework.db.createHikariPoolDataSource
 import io.ebean.Database
@@ -35,32 +34,28 @@ class EBeanModule {
     @Singleton
     @Named("databaseUser")
     fun username(config: JsonObject): String {
-        val key = "DATABASE_USER"
-        return config.getTry<String>(key).getOrElse { throw it }
+        return config.getExcept<String>("DATABASE_USER")
     }
 
     @Provides
     @Singleton
     @Named("databasePassword")
     fun password(config: JsonObject): String {
-        val key = "DATABASE_PASSWORD"
-        return config.getTry<String>(key).getOrElse { throw it }
+        return config.getExcept<String>("DATABASE_PASSWORD")
     }
 
     @Provides
     @Singleton
     @Named("databaseUrl")
     fun url(config: JsonObject): String {
-        val key = "DATABASE_URL"
-        return config.getTry<String>(key).getOrElse { throw it }
+        return config.getExcept<String>("DATABASE_URL")
     }
 
     @Provides
     @Singleton
     @Named("databaseDriver")
     fun driver(config: JsonObject): String {
-        val key = "DATABASE_DRIVER_CLASSNAME"
-        return config.getTry<String>(key).getOrElse { throw it }
+        return config.getExcept<String>("DATABASE_DRIVER_CLASSNAME")
     }
 
     @Provides
