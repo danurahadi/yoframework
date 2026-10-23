@@ -34,17 +34,18 @@ fun randomAlpha(count: Int): String {
     )
 }
 
+private val nonAlphanumericRegex = "[^a-z0-9]".toRegex()
+private val whitespacesRegex = "\\s+".toRegex()
+
 fun String.slugify(): String {
     return this.lowercase()
-        .replace("[^a-z0-9]".toRegex(), " ")
-        .replace("\\s+".toRegex(), " ")
+        .replace(nonAlphanumericRegex, " ")
+        .replace(whitespacesRegex, " ")
         .replace(" ", "-")
 }
 
 fun String.shaHash(): String {
-    val messageDigest = MessageDigest.getInstance("SHA-256")
-    messageDigest.update(this.toByteArray())
-    return String(messageDigest.digest())
+    return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(this.toByteArray()))
 }
 
 private const val DEFAULT_WIDTH: Int = 42

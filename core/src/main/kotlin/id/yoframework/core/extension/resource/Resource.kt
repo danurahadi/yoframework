@@ -20,36 +20,30 @@ import id.yoframework.core.exception.DataInconsistentException
 import id.yoframework.core.extension.logger.logger
 import io.vertx.core.buffer.Buffer
 import io.vertx.core.json.JsonObject
-import org.apache.commons.io.IOUtils
 import java.io.File
 import java.io.FileInputStream
 import java.io.IOException
+import java.io.InputStream
 import java.io.InputStreamReader
 import java.net.ServerSocket
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.nio.file.Paths
 
+// String's own class loader only sees JDK resources, so fall back to the application class loader
+private fun String.openResource(): InputStream? {
+    return javaClass.getResourceAsStream(this)
+        ?: Thread.currentThread().contextClassLoader?.getResourceAsStream(removePrefix("/"))
+}
+
 fun String.resourceToBuffer(): Buffer {
-    val inputStream = javaClass.getResourceAsStream(this)
-    val byteArray = inputStream?.let { s ->
-        val bArray = ByteArray(s.available())
-        s.use { i ->
-            i.read(bArray)
-        }
-    }
-    return if (byteArray != null) {
-        Buffer.buffer(byteArray)
-    } else {
-        throw DataInconsistentException("Invalid string value.")
-    }
+    val inputStream = openResource()
+        ?: throw DataInconsistentException("Invalid string value.")
+    return Buffer.buffer(inputStream.use { it.readAllBytes() })
 }
 
 fun String.pathToByteArray(): ByteArray {
-    val inputStream = FileInputStream(this)
-    return inputStream.use {
-        IOUtils.toByteArray(it)
-    }
+    return FileInputStream(this).use { it.readAllBytes() }
 }
 
 fun String.readFileLine(): List<String> {
@@ -59,7 +53,7 @@ fun String.readFileLine(): List<String> {
 fun String.loadJsonObject(): JsonObject {
     val logger = logger(JsonObject::class)
     return try {
-        val stream = javaClass.getResourceAsStream(this)
+        val stream = openResource()
         val inputStream = stream?.let { InputStreamReader(it, StandardCharsets.UTF_8) }
         val jsonString = inputStream?.useLines { it.joinToString("") }
 
@@ -88,10 +82,5 @@ fun String.toBuffer(): Buffer {
 }
 
 fun randomPort(): Int {
-    val socket = ServerSocket(0)
-
-    val port = socket.localPort
-    socket.close()
-
-    return port
+    return ServerSocket(0).use { it.localPort }
 }

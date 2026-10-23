@@ -64,44 +64,6 @@ inline fun <reified T : Any> JsonObject?.toValue(): T? {
     return this.toValue(T::class)
 }
 
-private val supportedPrimitiveTypes = listOf(
-    String::class,
-    Int::class,
-    Long::class,
-    Double::class,
-    Float::class,
-    Boolean::class
-)
-
-private val primitiveMapping: (KClass<*>, JsonObject, String) -> Any? = { clazz, json, key ->
-    when {
-        clazz.isSubclassOf(String::class) -> json.getString(key)
-        clazz.isSubclassOf(Int::class) -> json.getInteger(key)
-        clazz.isSubclassOf(Long::class) -> json.getLong(key)
-        clazz.isSubclassOf(Double::class) -> json.getDouble(key)
-        clazz.isSubclassOf(Float::class) -> json.getFloat(key)
-        clazz.isSubclassOf(Boolean::class) -> json.getBoolean(key)
-        else -> null
-    }
-}
-
-private val supportedTypes = listOf(
-    Instant::class,
-    JsonObject::class,
-    ByteArray::class,
-    JsonArray::class
-)
-
-private val mapping: (KClass<*>, JsonObject, String) -> Any? = { clazz, json, key ->
-    when {
-        clazz.isSubclassOf(Instant::class) -> json.getInstant(key)
-        clazz.isSubclassOf(JsonObject::class) -> json.getJsonObject(key)
-        clazz.isSubclassOf(JsonArray::class) -> json.getJsonArray(key)
-        clazz.isSubclassOf(ByteArray::class) -> json.getBinary(key)
-        else -> null
-    }
-}
-
 /**
  * Get direct parent from path [path]
  * return pair of [JsonObject] and [String] remaining path or null if path is invalid.
@@ -110,24 +72,19 @@ private val mapping: (KClass<*>, JsonObject, String) -> Any? = { clazz, json, ke
  * @see id.yoframework.core.module.CoreModule
  */
 private fun JsonObject.getDirectParent(path: String): Pair<JsonObject, String>? {
-    val paths = path.split(".")
-    return when {
-        paths.size == 1 -> this to path
-        paths.size > 1 -> {
-            val parents = paths.subList(0, paths.size - 1)
-            val jsonParent = try {
-                parents.fold(this as JsonObject?) { item, parent ->
-                    item?.getJsonObject(parent)
-                }
-            } catch (e: ClassCastException) {
-                log.warn("${e.message} occurred when get direct parent", e)
-                null
-            }
+    val lastDot = path.lastIndexOf('.')
+    if (lastDot < 0) return this to path
 
-            jsonParent?.let { it to paths.last() }
+    val jsonParent = try {
+        path.substring(0, lastDot).split(".").fold(this as JsonObject?) { item, parent ->
+            item?.getJsonObject(parent)
         }
-        else -> null
+    } catch (e: ClassCastException) {
+        log.warn("${e.message} occurred when get direct parent", e)
+        null
     }
+
+    return jsonParent?.let { it to path.substring(lastDot + 1) }
 }
 
 /**
@@ -139,11 +96,19 @@ private fun JsonObject.getDirectParent(path: String): Pair<JsonObject, String>? 
  */
 @Suppress("UNCHECKED_CAST")
 fun <T : Any> JsonObject?.getNested(clazz: KClass<T>, key: String): T? {
-    val (parent, lastPath) = this?.getDirectParent(key) ?: return null
+    val [parent, lastPath] = this?.getDirectParent(key) ?: return null
     return when {
-        supportedPrimitiveTypes.any { clazz.isSubclassOf(it) } -> primitiveMapping(clazz, parent, lastPath) as T?
-        supportedTypes.any { clazz.isSubclassOf(it) } -> mapping(clazz, parent, lastPath) as T?
-        else -> parent.get<T>(lastPath)
+        clazz == String::class -> parent.getString(lastPath) as T?
+        clazz == Int::class -> parent.getInteger(lastPath) as T?
+        clazz == Long::class -> parent.getLong(lastPath) as T?
+        clazz == Double::class -> parent.getDouble(lastPath) as T?
+        clazz == Float::class -> parent.getFloat(lastPath) as T?
+        clazz == Boolean::class -> parent.getBoolean(lastPath) as T?
+        clazz.isSubclassOf(Instant::class) -> parent.getInstant(lastPath) as T?
+        clazz.isSubclassOf(JsonObject::class) -> parent.getJsonObject(lastPath) as T?
+        clazz.isSubclassOf(JsonArray::class) -> parent.getJsonArray(lastPath) as T?
+        clazz.isSubclassOf(ByteArray::class) -> parent.getBinary(lastPath) as T?
+        else -> parent[lastPath]
     }
 }
 

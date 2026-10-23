@@ -1,7 +1,10 @@
 package id.yoframework.core.json
 
 import arrow.data.Validated
+import id.yoframework.core.json.validator.equalTo
 import id.yoframework.core.json.validator.error.ValidationError
+import id.yoframework.core.json.validator.greaterThan
+import id.yoframework.core.json.validator.lessThan
 import id.yoframework.core.json.validator.notNull
 import io.vertx.kotlin.core.json.json
 import io.vertx.kotlin.core.json.obj
@@ -63,4 +66,18 @@ class ValidatorTest {
         }
     }
 
+    @Test
+    fun `numeric comparison validators must compare values correctly`() {
+        assertTrue(jsonObject.equalTo("some_integer", 12).isValid)
+        assertTrue(jsonObject.equalTo("some_integer", 13).isInvalid)
+
+        assertTrue(jsonObject.greaterThan("some_integer", 11).isValid)
+        assertTrue(jsonObject.greaterThan("some_integer", 12).isInvalid)
+        assertTrue(jsonObject.greaterThan("some_integer", 12, equals = true).isValid)
+
+        assertTrue(jsonObject.lessThan("some_integer", 13).isValid)
+        assertTrue(jsonObject.lessThan("some_integer", 11).isInvalid)
+        assertTrue(jsonObject.lessThan("some_integer", 12).isInvalid)
+        assertTrue(jsonObject.lessThan("some_integer", 12, equals = true).isValid)
+    }
 }

@@ -58,24 +58,24 @@ dependencies {
 }
 
 kotlin {
-    jvmToolchain(26)
+    jvmToolchain(27)
 }
 
 tasks {
 
     compileKotlin {
         kotlinOptions {
-            apiVersion = "2.4"
-            languageVersion = "2.4"
-            allWarningsAsErrors = false
+            apiVersion = "2.5"
+            languageVersion = "2.5"
+            allWarningsAsErrors = true
         }
     }
 
     compileTestKotlin {
         kotlinOptions {
-            apiVersion = "2.4"
-            languageVersion = "2.4"
-            allWarningsAsErrors = false
+            apiVersion = "2.5"
+            languageVersion = "2.5"
+            allWarningsAsErrors = true
 //            freeCompilerArgs = [
 ////                "-Xuse-k2", "-Xbackend-threads=2"
 //            ]
@@ -100,7 +100,7 @@ tasks {
     }
 
     jacoco {
-        toolVersion = "0.8.14"
+        toolVersion = "0.8.15"
     }
 
     jacocoTestReport {
@@ -128,7 +128,7 @@ artifacts {
 detekt {
     // Version of detekt that will be used. When unspecified the latest detekt
     // version found will be used. Override to stay on the same version.
-    toolVersion = "2.0.0-alpha.1"
+    toolVersion = "2.0.0-alpha.6"
 
     // The directories where detekt looks for source files.
     // Defaults to `files("src/main/java", "src/test/java", "src/main/kotlin", "src/test/kotlin")`.

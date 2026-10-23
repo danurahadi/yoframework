@@ -42,7 +42,7 @@ fun job(coroutineContext: CoroutineContext, executable: suspend (JobExecutionCon
 }
 
 inline fun <reified T : Job> job(vararg data: Pair<String, Any>): JobBuilder {
-    val jobDataMap = data.fold(JobDataMap()) { map, (key, value) ->
+    val jobDataMap = data.fold(JobDataMap()) { map, [key, value] ->
         map[key] = value
         map
     }

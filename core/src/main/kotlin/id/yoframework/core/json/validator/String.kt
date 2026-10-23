@@ -40,8 +40,9 @@ fun JsonObject.format(key: String, format: Regex): Validated<ValidationError, St
     }
 }
 
+private val emailRegex = "^[\\w-\\+]+(\\.[\\w]+)*@[\\w-]+(\\.[\\w]+)*(\\.[a-z]{2,})$".toRegex()
+
 fun JsonObject.email(key: String): Validated<ValidationError, String> {
-    val emailRegex = "^[\\w-\\+]+(\\.[\\w]+)*@[\\w-]+(\\.[\\w]+)*(\\.[a-z]{2,})$".toRegex()
     return this.format(key, emailRegex).leftMap {
         EmailError("$key is not a valid email")
     }

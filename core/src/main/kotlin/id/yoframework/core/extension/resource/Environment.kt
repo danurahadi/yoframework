@@ -18,19 +18,18 @@ package id.yoframework.core.extension.resource
 
 import id.yoframework.core.extension.logger.logger
 import kotlin.reflect.KClass
-import kotlin.reflect.full.isSubclassOf
 
 @Suppress("UNCHECKED_CAST")
 fun <T : Any> env(clazz: KClass<T>, key: String, defaultValue: T? = null): T {
     val value: String? = System.getenv(key)
     return if (value != null) {
-        when {
-            clazz.isSubclassOf(String::class) -> value as T
-            clazz.isSubclassOf(Int::class) -> value.toInt() as T
-            clazz.isSubclassOf(Long::class) -> value.toLong() as T
-            clazz.isSubclassOf(Double::class) -> value.toDouble() as T
-            clazz.isSubclassOf(Float::class) -> value.toFloat() as T
-            clazz.isSubclassOf(Boolean::class) -> value.toBoolean() as T
+        when (clazz) {
+            String::class -> value as T
+            Int::class -> value.toInt() as T
+            Long::class -> value.toLong() as T
+            Double::class -> value.toDouble() as T
+            Float::class -> value.toFloat() as T
+            Boolean::class -> value.toBoolean() as T
             else -> throw IllegalArgumentException("${clazz.qualifiedName} Not Supported")
         }
     } else {

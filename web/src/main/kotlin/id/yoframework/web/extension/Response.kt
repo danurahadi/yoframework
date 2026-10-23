@@ -22,14 +22,15 @@ import io.netty.handler.codec.http.HttpResponseStatus
 import io.vertx.core.buffer.Buffer
 import io.vertx.ext.web.RoutingContext
 import io.vertx.ext.web.common.template.TemplateEngine
-import io.vertx.kotlin.core.json.Json
 import io.vertx.kotlin.coroutines.coAwait
 
 fun RoutingContext.wireJson(obj: Any) {
     val response = this.response()
-    response.putHeader("Content-Type", "application/json; charset=utf-8")
+    response
+        .setChunked(true)
         .putHeader("Access-Control-Allow-Origin", "*")
-        .end(Json.encode(obj))
+        .putHeader("Content-Type", "application/json; charset=utf-8")
+        .end(encode(obj))
 }
 
 fun RoutingContext.text(obj: Any, contentType: String = "text/plain") {
@@ -40,19 +41,19 @@ fun RoutingContext.text(obj: Any, contentType: String = "text/plain") {
 
 fun RoutingContext.wireJson(headers: Map<String, String> = emptyMap(), message: Any) {
     this.response().apply {
-        headers.entries.fold(this) { response, entries ->
-            response.putHeader(entries.key, entries.value)
+        headers.forEach { (key, value) ->
+            putHeader(key, value)
         }
         putHeader("Content-Type", "application/json; charset=utf-8")
-        end(Json.encode(message))
+        end(encode(message))
     }
 }
 
 fun RoutingContext.ok(message: String = "", headers: Map<String, String> = emptyMap()) {
     this.response().let {
         it.statusCode = HttpResponseStatus.OK.code()
-        headers.entries.fold(it) { response, entries ->
-            response.putHeader(entries.key, entries.value)
+        headers.forEach { (key, value) ->
+            it.putHeader(key, value)
         }
         it.end(message)
     }
@@ -62,7 +63,7 @@ fun RoutingContext.wirePrettyJson(obj: Any) {
     val response = this.response()
     response.putHeader("Content-Type", "application/json; charset=utf-8")
         .putHeader("Access-Control-Allow-Origin", "*")
-        .end(Json.encodePrettily(obj))
+        .end(encodePrettily(obj))
 }
 
 suspend fun RoutingContext.sendFile(fileName: String): Void? {

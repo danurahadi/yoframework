@@ -40,28 +40,10 @@ class WARN(val message: String, val throwable: Throwable? = null) : LogType()
 class ERROR(val message: String, val throwable: Throwable? = null) : LogType()
 
 fun Logger.log(log: LogType, defaultParam: Map<String, Any> = emptyMap(), vararg params: Pair<String, Any>) {
-    val allParams = defaultParam + params.toList().toMap()
+    val marker = Markers.appendEntries(defaultParam + params)
     when (log) {
-        is INFO -> {
-            if (log.throwable != null) {
-                this.info(Markers.appendEntries(allParams), log.message, log.throwable)
-            } else {
-                this.info(Markers.appendEntries(allParams), log.message)
-            }
-        }
-        is WARN -> {
-            if (log.throwable != null) {
-                this.warn(Markers.appendEntries(allParams), log.message, log.throwable)
-            } else {
-                this.warn(Markers.appendEntries(allParams), log.message)
-            }
-        }
-        is ERROR -> {
-            if (log.throwable != null) {
-                this.error(Markers.appendEntries(allParams), log.message, log.throwable)
-            } else {
-                this.error(Markers.appendEntries(allParams), log.message)
-            }
-        }
+        is INFO -> if (log.throwable != null) info(marker, log.message, log.throwable) else info(marker, log.message)
+        is WARN -> if (log.throwable != null) warn(marker, log.message, log.throwable) else warn(marker, log.message)
+        is ERROR -> if (log.throwable != null) error(marker, log.message, log.throwable) else error(marker, log.message)
     }
 }

@@ -39,7 +39,7 @@ object Command
  * @author Deny Prasetyo
  */
 
-fun Command.execute(
+fun execute(
     commands: List<String>,
     input: Any? = null,
     output: Any? = null,

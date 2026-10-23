@@ -89,7 +89,7 @@ abstract class Repository<T : Model, in ID : Any>(
     }
 
     open fun createQueryByFields(vararg fieldList: Pair<String, Any?>): Query<T> {
-        return fieldList.fold(query) { q, (field, value) ->
+        return fieldList.fold(query) { q, [field, value] ->
             q.filter(field, value)
         }
     }
@@ -143,11 +143,11 @@ abstract class Repository<T : Model, in ID : Any>(
         vararg updateQuery: Pair<String, Any?>,
         updateOperation: List<Pair<String, Any?>>
     ): UpdateResults {
-        val queries = updateQuery.fold(query) { q, (field, value) ->
+        val queries = updateQuery.fold(query) { q, [field, value] ->
             q.filter(field, value)
         }
 
-        val updateOperations = updateOperation.toList().fold(updateOps) { u, (field, value) ->
+        val updateOperations = updateOperation.toList().fold(updateOps) { u, [field, value] ->
             u(field to value)
         }
 
@@ -167,7 +167,7 @@ abstract class Repository<T : Model, in ID : Any>(
     }
 
     open fun deleteByFields(vararg deleteFields: Pair<String, Any?>): WriteResult {
-        val queries = deleteFields.fold(query) { q, (field, value) ->
+        val queries = deleteFields.fold(query) { q, [field, value] ->
             q.filter(field, value)
         }
         return datastore.delete(queries)

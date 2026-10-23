@@ -17,7 +17,6 @@
 package id.yoframework.core.json
 
 import io.vertx.core.json.JsonObject
-import io.vertx.kotlin.core.json.Json
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
@@ -35,7 +34,7 @@ class JsonTest {
 
     @BeforeEach
     fun before() {
-        Json.enable()
+        enable()
     }
 
     @Test

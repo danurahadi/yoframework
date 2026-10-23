@@ -27,7 +27,7 @@ import kotlin.test.assertNotNull
 class CoreModuleTest {
 
     @Test
-    fun `core module should produce correct object`() = runBlocking {
+    fun `core module should produce correct object`(): Unit = runBlocking {
         val vertx = buildVertx()
         val propertyConfig = propertiesConfig("config-test.properties")
 

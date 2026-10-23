@@ -17,13 +17,12 @@
 package id.yoframework.hystrix
 
 import com.netflix.hystrix.HystrixCommand
+import kotlinx.coroutines.suspendCancellableCoroutine
 import java.util.concurrent.ExecutionException
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
-import kotlin.coroutines.suspendCoroutine
 
-@Suppress("BlockingMethodInNonBlockingContext")
 open class HystrixCommand<T : Any>(
     configSetter: Setter,
     private val operation: () -> T,
@@ -41,7 +40,7 @@ open class HystrixCommand<T : Any>(
 
     suspend fun value(): T {
         val future = super.queue()
-        return suspendCoroutine { cont: Continuation<T> ->
+        return suspendCancellableCoroutine { cont: Continuation<T> ->
             try {
                 cont.resume(future.get())
             } catch (e: ExecutionException) {

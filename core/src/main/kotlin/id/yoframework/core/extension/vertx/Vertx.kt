@@ -34,11 +34,7 @@ import kotlinx.coroutines.coroutineScope
 suspend fun Vertx.deployVerticle(verticle: Verticle, config: JsonObject, worker: Boolean = false): String {
     val option = DeploymentOptions().apply {
         this.config = config
-        if (worker) {
-            this.setThreadingModel(ThreadingModel.WORKER)
-        } else {
-            this.setThreadingModel(ThreadingModel.EVENT_LOOP)
-        }
+        setThreadingModel(if (worker) ThreadingModel.WORKER else ThreadingModel.EVENT_LOOP)
     }
     return this.deployVerticle(verticle, option).coAwait()
 }
@@ -57,7 +53,7 @@ fun buildVertx(): Vertx {
 
 /**
  * Converts this deferred value to the instance of Promise.
- * The deferred value is cancelled when the resulting promise is cancelled or otherwise completed.
+ * The deferred value is canceled when the resulting promise is canceled or otherwise completed.
  */
 @ExperimentalCoroutinesApi
 fun <T> Deferred<T>.toPromise(promise: Promise<T>) {

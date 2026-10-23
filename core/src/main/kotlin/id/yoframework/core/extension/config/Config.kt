@@ -22,49 +22,29 @@ import io.vertx.core.Vertx
 import io.vertx.core.json.JsonObject
 import io.vertx.kotlin.config.configRetrieverOptionsOf
 import io.vertx.kotlin.config.configStoreOptionsOf
-import io.vertx.kotlin.core.json.json
-import io.vertx.kotlin.core.json.obj
 import io.vertx.kotlin.coroutines.coAwait
 
-fun propertiesConfig(path: String): ConfigStoreOptions {
+private fun fileConfig(format: String, path: String): ConfigStoreOptions {
     return configStoreOptionsOf(
         type = "file",
-        format = "properties",
+        format = format,
         optional = true,
-        config = json {
-            obj("path" to path)
-        }
+        config = JsonObject().put("path", path)
     )
 }
 
-fun jsonConfig(path: String): ConfigStoreOptions {
-    return configStoreOptionsOf(
-        type = "file",
-        format = "json",
-        optional = true,
-        config = json {
-            obj("path" to path)
-        }
-    )
-}
+fun propertiesConfig(path: String): ConfigStoreOptions = fileConfig("properties", path)
 
-fun yamlConfig(path: String): ConfigStoreOptions {
-    return configStoreOptionsOf(
-        type = "file",
-        format = "yaml",
-        optional = true,
-        config = json {
-            obj("path" to path)
-        }
-    )
-}
+fun jsonConfig(path: String): ConfigStoreOptions = fileConfig("json", path)
+
+fun yamlConfig(path: String): ConfigStoreOptions = fileConfig("yaml", path)
 
 suspend fun Vertx.retrieveConfig(vararg stores: ConfigStoreOptions): JsonObject {
     val sysConfig = configStoreOptionsOf(type = "sys")
     val envConfig = configStoreOptionsOf(type = "env")
 
     val options = configRetrieverOptionsOf(
-        stores = stores.toList().plus(sysConfig).plus(envConfig)
+        stores = stores.asList() + sysConfig + envConfig
     )
 
     val retriever = ConfigRetriever.create(this, options)

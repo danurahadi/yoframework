@@ -42,8 +42,8 @@ object ConfigSpec : Spek({
                 val config = vertx.retrieveConfig(propertyConfig)
 
                 it("should retrieve correct value when given correct key") {
-                    assertEquals(config.getExcept("TEST_KEY"), "Test Value From Properties File")
-                    assertEquals(config.getExcept("TEST_INT"), 1234)
+                    assertEquals("Test Value From Properties File", config.getExcept("TEST_KEY"))
+                    assertEquals(1234, config.getExcept("TEST_INT"))
                 }
                 it("throw exception when given incorrect key") {
                     assertFailsWith(IllegalArgumentException::class) { config.getExcept("NOT_EXISTS_KEY") }
@@ -57,10 +57,10 @@ object ConfigSpec : Spek({
                 val config = vertx.retrieveConfig(jsonConfig)
 
                 it("should retrieve correct value when given correct key") {
-                    assertEquals(config.getExcept("TEST_KEY"), "Test Value From JSON")
-                    assertEquals(config.getExcept("TEST_INT"), 1234)
-                    assertEquals(config.getExcept<JsonObject>("SUPER").getExcept("DUPER"), "Yes")
-                    assertEquals(config.getExcept<JsonObject>("SUPER").getExcept("HORE"), 46)
+                    assertEquals("Test Value From JSON", config.getExcept("TEST_KEY"))
+                    assertEquals(1234, config.getExcept("TEST_INT"))
+                    assertEquals("Yes", config.getExcept<JsonObject>("SUPER").getExcept("DUPER"))
+                    assertEquals(46, config.getExcept<JsonObject>("SUPER").getExcept("HORE"))
                 }
 
                 it("should throw exception when given incorrect key") {
@@ -75,10 +75,10 @@ object ConfigSpec : Spek({
                 val config = vertx.retrieveConfig(yamlConfig)
 
                 it("should retrieve correct value when given correct key") {
-                    assertEquals(config.getExcept("TEST_KEY"), "Test Value From YAML")
-                    assertEquals(config.getExcept("TEST_INT"), 1234)
-                    assertEquals(config.getExcept<JsonObject>("SUPER").getExcept("DUPER"), "Yeah")
-                    assertEquals(config.getExcept<JsonObject>("SUPER").getExcept("HORE"), 46)
+                    assertEquals("Test Value From YAML", config.getExcept("TEST_KEY"))
+                    assertEquals(1234, config.getExcept("TEST_INT"))
+                    assertEquals("Yeah", config.getExcept<JsonObject>("SUPER").getExcept("DUPER"))
+                    assertEquals(46, config.getExcept<JsonObject>("SUPER").getExcept("HORE"))
                 }
 
                 it("should throw exception when given incorrect key") {

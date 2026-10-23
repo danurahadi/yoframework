@@ -29,13 +29,13 @@ import io.vertx.core.json.JsonObject
 import kotlin.reflect.KClass
 
 fun <T : Number> T.compareTo(clazz: KClass<T>, value: T): Int {
-    return when {
-        clazz.isInstance(Byte::class) -> (this as Byte).compareTo(value as Byte)
-        clazz.isInstance(Long::class) -> (this as Long).compareTo(value as Long)
-        clazz.isInstance(Double::class) -> (this as Double).compareTo(value as Double)
-        clazz.isInstance(Float::class) -> (this as Float).compareTo(value as Float)
-        clazz.isInstance(Int::class) -> (this as Int).compareTo(value as Int)
-        clazz.isInstance(Short::class) -> (this as Short).compareTo(value as Short)
+    return when (clazz) {
+        Byte::class -> (this as Byte).compareTo(value as Byte)
+        Long::class -> (this as Long).compareTo(value as Long)
+        Double::class -> (this as Double).compareTo(value as Double)
+        Float::class -> (this as Float).compareTo(value as Float)
+        Int::class -> (this as Int).compareTo(value as Int)
+        Short::class -> (this as Short).compareTo(value as Short)
         else -> throw IllegalArgumentException("${clazz.qualifiedName} is not supported!")
     }
 }
@@ -122,7 +122,7 @@ inline fun <reified T : Number> JsonObject.lessThan(
     ).invalid()
 
     val comparison = value.compareTo(T::class, target)
-    return if (comparison > 0 || (equals && comparison == 0)) {
+    return if (comparison < 0 || (equals && comparison == 0)) {
         value.valid()
     } else {
         val message = "lessThan${if (equals) "OrEqualTo" else ""}"
@@ -136,7 +136,7 @@ inline fun <reified T : Number> JsonObject.numeric(
 ): Validated<ValidationError, T> {
     val value = this.saveGet(T::class, key) ?: return NotExistError("$key is not exists ").invalid()
 
-    val errors = configs.toList()
+    val errors = configs
         .map {
             when (it) {
                 is Numeric.GreaterThan<*> -> this.greaterThan(key, it.value, it.equals)

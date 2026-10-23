@@ -27,8 +27,8 @@ import org.mongodb.morphia.query.UpdateOperations
 
 fun MongoClient.buildMorphiaDatastore(databaseName: String, packages: Set<String>): Datastore {
     val morphia = Morphia().apply {
-        packages.fold(this) { morphia, pkg ->
-            morphia.mapPackage(pkg)
+        packages.forEach { pkg ->
+            mapPackage(pkg)
         }
     }
 
@@ -40,25 +40,25 @@ fun MongoClient.buildMorphiaDatastore(databaseName: String, packages: Set<String
 }
 
 fun <T : Model> Query<T>.filter(vararg filters: Pair<String, Any?>): Query<T> {
-    return filters.fold(this) { query, (key, value) ->
+    return filters.fold(this) { query, [key, value] ->
         query.field(key).equal(value)
     }
 }
 
 fun <T : Model> Query<T>.filterIgnoreCase(vararg filters: Pair<String, Any?>): Query<T> {
-    return filters.fold(this) { query, (key, value) ->
+    return filters.fold(this) { query, [key, value] ->
         query.field(key).equalIgnoreCase(value)
     }
 }
 
 fun <T : Model> Query<T>.filterRegex(vararg filters: Pair<String, String>): Query<T> {
-    return filters.fold(this) { query, (key, value) ->
+    return filters.fold(this) { query, [key, value] ->
         query.filter(key, value.toRegex())
     }
 }
 
 fun <T : Model> Query<T>.filterIn(vararg filters: Pair<String, Iterable<*>>): Query<T> {
-    return filters.fold(this) { query, (key, value) ->
+    return filters.fold(this) { query, [key, value] ->
         query.field(key).`in`(value)
     }
 }
@@ -98,7 +98,7 @@ fun <T : Model> UpdateOperations<T>.unset(vararg unsets: String): UpdateOperatio
 }
 
 operator fun <T : Model> UpdateOperations<T>.invoke(vararg sets: Pair<String, Any?>): UpdateOperations<T> {
-    return sets.fold(this) { updateOps, (key, value) ->
+    return sets.fold(this) { updateOps, [key, value] ->
         updateOps.setIfNotNull(key, value)
     }
 }

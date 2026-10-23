@@ -23,7 +23,6 @@ import io.vertx.core.Vertx
 import io.vertx.core.eventbus.EventBus
 import io.vertx.core.file.FileSystem
 import io.vertx.core.json.JsonObject
-import io.vertx.kotlin.core.json.Json
 import jakarta.validation.Validation
 import jakarta.validation.Validator
 import javax.inject.Singleton
@@ -35,7 +34,7 @@ class CoreModule(
 ) {
 
     init {
-        Json.enable()
+        enable()
     }
 
     @Provides
