@@ -22,6 +22,7 @@ import io.netty.handler.codec.http.HttpResponseStatus
 import io.vertx.core.buffer.Buffer
 import io.vertx.ext.web.RoutingContext
 import io.vertx.ext.web.common.template.TemplateEngine
+import io.vertx.kotlin.core.json.Json
 import io.vertx.kotlin.coroutines.coAwait
 
 fun RoutingContext.wireJson(obj: Any) {
@@ -29,7 +30,7 @@ fun RoutingContext.wireJson(obj: Any) {
     response
         .putHeader("Access-Control-Allow-Origin", "*")
         .putHeader("Content-Type", "application/json; charset=utf-8")
-        .end(encode(obj))
+        .end(Json.encode(obj))
 }
 
 fun RoutingContext.text(obj: Any, contentType: String = "text/plain") {
@@ -44,7 +45,7 @@ fun RoutingContext.wireJson(headers: Map<String, String> = emptyMap(), message: 
             putHeader(key, value)
         }
         putHeader("Content-Type", "application/json; charset=utf-8")
-        end(encode(message))
+        end(Json.encode(message))
     }
 }
 
@@ -62,7 +63,7 @@ fun RoutingContext.wirePrettyJson(obj: Any) {
     val response = this.response()
     response.putHeader("Content-Type", "application/json; charset=utf-8")
         .putHeader("Access-Control-Allow-Origin", "*")
-        .end(encodePrettily(obj))
+        .end(Json.encodePrettily(obj))
 }
 
 suspend fun RoutingContext.sendFile(fileName: String): Void? {

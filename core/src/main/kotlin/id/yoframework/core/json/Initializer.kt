@@ -22,8 +22,9 @@ import com.fasterxml.jackson.module.paramnames.ParameterNamesModule
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
 import io.vertx.core.json.jackson.DatabindCodec
+import io.vertx.kotlin.core.json.Json as KJson
 
-fun enable() {
+fun KJson.enable() {
     DatabindCodec.mapper().apply {
         registerKotlinModule()
         registerModule(ParameterNamesModule())
@@ -31,11 +32,11 @@ fun enable() {
     }
 }
 
-fun encodePrettily(obj: Any): String {
+fun KJson.encodePrettily(obj: Any): String {
     return Json.encodePrettily(obj)
 }
 
-fun encode(obj: Any): String {
+fun KJson.encode(obj: Any): String {
     return Json.encode(obj)
 }
 

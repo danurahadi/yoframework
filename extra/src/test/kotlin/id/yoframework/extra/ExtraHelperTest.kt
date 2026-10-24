@@ -16,6 +16,7 @@
 
 package id.yoframework.extra
 
+import id.yoframework.extra.extension.command.Command
 import id.yoframework.extra.extension.command.execute
 import id.yoframework.extra.extension.regex.matchAll
 import id.yoframework.extra.extension.regex.matchFirst
@@ -43,7 +44,7 @@ class ExtraHelperTest {
     @Test
     fun `execute must pipe input and output streams`() {
         val output = ByteArrayOutputStream()
-        val exitCode = execute(listOf("cat"), input = ByteArrayInputStream("hello".toByteArray()), output = output)
+        val exitCode = Command.execute(listOf("cat"), input = ByteArrayInputStream("hello".toByteArray()), output = output)
         assertEquals(0, exitCode)
         assertEquals("hello", output.toString())
     }

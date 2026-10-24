@@ -37,7 +37,7 @@ private val log = logger("CommandExtension")
  * @author Deny Prasetyo
  */
 
-fun execute(
+fun Command.execute(
     commands: List<String>,
     input: Any? = null,
     output: Any? = null,
